@@ -1,7 +1,7 @@
 package server
 
 import (
-	v1 "layout/api/layout/v1"
+	v1 "layout/api/helloworld/v1"
 	"layout/internal/conf"
 	"layout/internal/service"
 

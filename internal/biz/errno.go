@@ -1,7 +1,7 @@
 package biz
 
 import (
-	v1 "layout/api/layout/v1"
+	v1 "layout/api/helloworld/v1"
 
 	"github.com/go-kratos/kratos/v2/errors"
 )

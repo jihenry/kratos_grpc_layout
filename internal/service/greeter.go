@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	v1 "layout/api/layout/v1"
+	v1 "layout/api/helloworld/v1"
 	"layout/internal/biz"
 	"layout/internal/biz/domain"
 )

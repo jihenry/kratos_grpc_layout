@@ -2,16 +2,21 @@ package main
 
 import (
 	"flag"
+	"math/rand"
 	"os"
+	"time"
 
 	"layout/internal/conf"
+
+	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	plog "gitlab.yeahka.com/gaas/pkg/log"
+	"gitlab.yeahka.com/gaas/pkg/registry"
+	"gitlab.yeahka.com/gaas/pkg/rpc"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -30,54 +35,70 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 
-func newApp(logger log.Logger, hs *http.Server, gs *grpc.Server) *kratos.App {
+func newApp(gs *grpc.Server, r *nacos.Registry) *kratos.App {
+	rpc.SetDiscovery(r)
+	registry.SetDiscovery(r)
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
 		kratos.Version(Version),
 		kratos.Metadata(map[string]string{}),
-		kratos.Logger(logger),
+		kratos.Registrar(r),
 		kratos.Server(
-			hs,
 			gs,
 		),
 	)
 }
 
-func main() {
-	flag.Parse()
-	logger := log.With(log.NewStdLogger(os.Stdout),
-		"ts", log.DefaultTimestamp,
-		"caller", log.DefaultCaller,
+func initLogger(c *conf.Zap) error {
+	baseLogger, err := plog.NewZapLogger(
+		plog.WithConsole(c.Console),
+		plog.WithDir(c.Dir),
+		plog.WithFileName(c.FileName),
+		plog.WithLevel(c.Level),
+	)
+	if err != nil {
+		return err
+	}
+	logger := log.With(baseLogger,
 		"service.id", id,
 		"service.name", Name,
 		"service.version", Version,
-		"trace.id", tracing.TraceID(),
-		"span.id", tracing.SpanID(),
+		"trace_id", tracing.TraceID(),
+		"span_id", tracing.SpanID(),
 	)
-	c := config.New(
-		config.WithSource(
-			file.NewSource(flagconf),
-		),
-	)
-	defer c.Close()
+	log.SetLogger(logger)
+	return nil
+}
 
-	if err := c.Load(); err != nil {
+func main() {
+	flag.Parse()
+	rand.Seed(time.Now().UnixNano())
+	//1. 加载配置
+	bc, err := conf.Load(flagconf)
+	defer conf.Close()
+	if err != nil {
 		panic(err)
 	}
-
-	var bc conf.Bootstrap
-	if err := c.Scan(&bc); err != nil {
+	//2. 初始化日志
+	if err := initLogger(bc.Zap); err != nil {
 		panic(err)
 	}
-
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+	//3. 注册中心
+	registry, err := registry.NewNacosClient(bc.Nacos.Addr, uint64(bc.Nacos.Port),
+		constant.WithCacheDir(bc.Nacos.CacheDir),
+		constant.WithLogDir(bc.Nacos.LogDir),
+		constant.WithNamespaceId(bc.Nacos.Namespace))
+	if err != nil {
+		panic(err)
+	}
+	//4. 初始化服务
+	app, cleanup, err := wireApp(bc.Server, bc.Data, registry)
 	if err != nil {
 		panic(err)
 	}
 	defer cleanup()
-
-	// start and wait for stop signal
+	//5. 启动服务
 	if err := app.Run(); err != nil {
 		panic(err)
 	}

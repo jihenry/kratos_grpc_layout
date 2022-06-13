@@ -2,6 +2,8 @@ GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
 API_PROTO_FILES=$(shell find api -name *.proto)
+BIN=./bin/
+BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
 .PHONY: init
 # init env
@@ -10,25 +12,35 @@ init:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 	go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
 	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
+	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2@latest
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
+
+.PHONY: errors
+# generate errors code
+errors:
+	protoc --proto_path=. \
+               --proto_path=./third_party \
+               --go_out=paths=source_relative:. \
+               --go-errors_out=paths=source_relative:. \
+               $(API_PROTO_FILES)
 
 .PHONY: config
 # generate internal proto
 config:
-	protoc --proto_path=./internal \
+	protoc --proto_path=. \
 	       --proto_path=./third_party \
- 	       --go_out=paths=source_relative:./internal \
+ 	       --go_out=paths=source_relative:. \
 	       $(INTERNAL_PROTO_FILES)
 
 .PHONY: api
 # generate api proto
 api:
-	protoc --proto_path=./api \
+	protoc --proto_path=. \
 	       --proto_path=./third_party \
- 	       --go_out=paths=source_relative:./api \
- 	       --go-http_out=paths=source_relative:./api \
- 	       --go-grpc_out=paths=source_relative:./api \
-	       --openapi_out=fq_schema_naming=true,default_response=false:. \
+ 	       --go_out=paths=source_relative:. \
+ 	       --go-http_out=paths=source_relative:. \
+ 	       --go-grpc_out=paths=source_relative:. \
+ 	       --openapi_out==paths=source_relative:. \
 	       $(API_PROTO_FILES)
 
 .PHONY: build
@@ -36,17 +48,34 @@ api:
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
+.PHONY: build_linux
+# build_linux
+build_linux:
+ifdef ONLINE
+ifeq (${BRANCH},master)
+	mkdir -p $(BIN) && env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION)" -o $(BIN) ./cmd/...
+else
+	$(error the current git branch:${BRANCH} not master)
+endif
+else
+	mkdir -p $(BIN) && env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION)" -o $(BIN) ./cmd/...
+endif
+
+.PHONY: tool
+# tool
+tool:
+	mkdir -p $(BIN) && env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION)" -o $(BIN) ./tools/...
+
 .PHONY: generate
 # generate
 generate:
-	go mod tidy
-	go get github.com/google/wire/cmd/wire@latest
 	go generate ./...
 
 .PHONY: all
 # generate all
 all:
 	make api;
+	make errors;
 	make config;
 	make generate;
 

@@ -1,13 +1,24 @@
 syntax = "proto3";
 package kratos.api;
 
-option go_package = "layout/internal/conf;conf";
+option go_package = "base/internal/conf;conf";
 
 import "google/protobuf/duration.proto";
 
 message Bootstrap {
+  enum Env {
+    Dev = 0;
+    Test = 1;
+    UAT = 2;
+    Online = 3;
+  }
   Server server = 1;
   Data data = 2;
+  Nacos nacos = 3; //nacos注册中心
+  Zap zap = 4; //zap日志
+  bool debug = 5; //是否是调试模式
+  Env env = 6; //服务环境
+  TA ta = 7; //数数上报配置
 }
 
 message Server {
@@ -26,16 +37,61 @@ message Server {
 }
 
 message Data {
+  message Cache {
+    google.protobuf.Duration cfg_lifetime = 1; //过期时间
+    bool cfg_debug = 2; //是否开启配置点缓存
+  }
   message Database {
     string driver = 1;
     string source = 2;
+    int32 max_conn = 3;
+    int32 max_idle_conn = 4;
+    google.protobuf.Duration max_lifetime = 5;
+    int32 log_level = 6;
   }
   message Redis {
     string network = 1;
     string addr = 2;
-    google.protobuf.Duration read_timeout = 3;
-    google.protobuf.Duration write_timeout = 4;
+    string password = 3; //连接密码
+    int32 db = 4;
+    google.protobuf.Duration read_timeout = 5;
+    google.protobuf.Duration write_timeout = 6;
   }
   Database database = 1;
-  Redis redis = 2;
+  Database userbase = 2;
+  Database oldbase = 3; //如果指定了这个，则老表从这里读取
+  Redis redis = 4;
+  Cache cache = 5; //缓存配置
+}
+
+message Nacos {
+  string addr = 1;
+  int32 port = 2;
+  string log_dir = 3;
+  string cache_dir = 4;
+  string rotate_time = 5;
+  int32 max_age = 6;
+  string log_level = 7;
+  bool not_load_cache_at_start = 8;
+  int32 timeout_ms = 9;
+  string namespace = 10;
+}
+
+message Zap {
+  string dir = 1; //日志目录
+  string file_name = 2; //文件名，不包含后缀
+  bool console = 3; //是否输出到终端，用于命令行启动显示
+  int32 max_age = 4; //最大存放天数，0为长期保存
+  string level = 5; //等级，默认info级别，有debug、info、warn、error等
+}
+
+message TA {
+  enum Model {
+    Patch = 0; //定时批量写入
+    Each = 1; //逐条写入
+    Debug = 2; //不入库，只校验数据
+  }
+  Model mode = 1; //模式
+  string server_url = 2; //数数部署的服务器url
+  string appid = 3; //数数的appid
 }

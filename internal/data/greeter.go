@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"layout/internal/biz"
+	"layout/internal/biz/domain"
+
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -12,30 +14,32 @@ type greeterRepo struct {
 	log  *log.Helper
 }
 
+var _ biz.GreeterRepo = (*greeterRepo)(nil)
+
 // NewGreeterRepo .
-func NewGreeterRepo(data *Data, logger log.Logger) biz.GreeterRepo {
+func NewGreeterRepo(data *Data) biz.GreeterRepo {
 	return &greeterRepo{
 		data: data,
-		log:  log.NewHelper(logger),
+		log:  log.NewHelper(log.GetLogger()),
 	}
 }
 
-func (r *greeterRepo) Save(ctx context.Context, g *biz.Greeter) (*biz.Greeter, error) {
+func (r *greeterRepo) Save(ctx context.Context, g *domain.Greeter) (*domain.Greeter, error) {
 	return g, nil
 }
 
-func (r *greeterRepo) Update(ctx context.Context, g *biz.Greeter) (*biz.Greeter, error) {
+func (r *greeterRepo) Update(ctx context.Context, g *domain.Greeter) (*domain.Greeter, error) {
 	return g, nil
 }
 
-func (r *greeterRepo) FindByID(context.Context, int64) (*biz.Greeter, error) {
+func (r *greeterRepo) FindByID(context.Context, int64) (*domain.Greeter, error) {
 	return nil, nil
 }
 
-func (r *greeterRepo) ListByHello(context.Context, string) ([]*biz.Greeter, error) {
+func (r *greeterRepo) ListByHello(context.Context, string) ([]*domain.Greeter, error) {
 	return nil, nil
 }
 
-func (r *greeterRepo) ListAll(context.Context) ([]*biz.Greeter, error) {
+func (r *greeterRepo) ListAll(context.Context) ([]*domain.Greeter, error) {
 	return nil, nil
 }

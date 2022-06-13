@@ -6,29 +6,28 @@
 package main
 
 import (
+	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
+	"github.com/go-kratos/kratos/v2"
 	"layout/internal/biz"
 	"layout/internal/conf"
 	"layout/internal/data"
 	"layout/internal/server"
 	"layout/internal/service"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
+func wireApp(confServer *conf.Server, confData *conf.Data, registry *nacos.Registry) (*kratos.App, func(), error) {
+	dataData, cleanup, err := data.NewData(confData)
 	if err != nil {
 		return nil, nil, err
 	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
+	greeterRepo := data.NewGreeterRepo(dataData)
+	greeterUsecase := biz.NewGreeterUsecase(greeterRepo)
 	greeterService := service.NewGreeterService(greeterUsecase)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	app := newApp(logger, httpServer, grpcServer)
+	grpcServer := server.NewGRPCServer(confServer, greeterService)
+	app := newApp(grpcServer, registry)
 	return app, func() {
 		cleanup()
 	}, nil

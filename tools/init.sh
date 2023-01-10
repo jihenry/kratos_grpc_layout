@@ -5,7 +5,7 @@ RUNDIR=$(dirname $CURDIR)
 echo "rundir:${RUNDIR}"
 
 if [ ! -n "$1" ];then
-    echo "please input project name. eg: /.init.sh helloworld"
+    echo "please input project name. eg: /.init.sh tact"
     exit 0
 else
     PROJECT=$1
@@ -21,13 +21,31 @@ echo "修改proto文件名：${PROTOBASE}"
 rm api/${PROJECT}/v1/*.go
 mv api/${PROJECT}/v1/greeter.proto api/${PROJECT}/v1/${PROTOBASE}.proto
 
-for i in `grep "helloworld" -r --exclude-dir=local --exclude-dir=.git --exclude=*.exe | cut -d: -f1 | uniq`
+for i in `grep "tact" -r --exclude-dir=local --exclude-dir=.git --exclude=*.exe | cut -d: -f1 | uniq`
 do
-    sed -i "s/helloworld/${PROJECT}/g" $i 
+    sed -i "s/tact/${PROJECT}/g" $i
 done
 
-for i in `grep "layout" -r --exclude-dir=local --exclude-dir=.git --exclude=*.exe | cut -d: -f1 | uniq`
+for i in `grep "tact" -r --exclude-dir=local --exclude-dir=.git --exclude=*.exe | cut -d: -f1 | uniq`
 do
-    sed -i "s/layout/${PROJECT}/g" $i 
+    sed -i "s/tact/${PROJECT}/g" $i
 done
 kratos proto client api/
+
+CPATH=local/dev/config.yaml
+if [ ! -e $CPATH ];then
+    echo "config file not exist" ; exit 1
+fi
+if [ -n "$3" ];then
+    CPATH=$3
+fi
+
+set -x
+
+cd cmd/${PROJECT}
+
+trap "rm ${PROJECT};kill 0" EXIT
+
+go build -o ${PROJECT}
+
+./${PROJECT} -conf ${RUNDIR}/${CPATH}

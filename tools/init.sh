@@ -21,14 +21,14 @@ echo "修改proto文件名：${PROTOBASE}"
 rm api/${PROJECT}/v1/*.go
 mv api/${PROJECT}/v1/greeter.proto api/${PROJECT}/v1/${PROTOBASE}.proto
 
-for i in `grep "tact" -r --exclude-dir=local --exclude-dir=.git --exclude=*.exe | cut -d: -f1 | uniq`
+for i in `grep "helloworld" -r --exclude-dir=local --exclude-dir=.git --exclude=*.exe --exclude=*.sh | cut -d: -f1 | uniq`
 do
-    sed -i "s/tact/${PROJECT}/g" $i
+    sed -i "s/helloworld/${PROJECT}/g" $i
 done
 
-for i in `grep "tact" -r --exclude-dir=local --exclude-dir=.git --exclude=*.exe | cut -d: -f1 | uniq`
+for i in `grep "layout" -r --exclude-dir=local --exclude-dir=.git --exclude=*.exe --exclude=*.sh | cut -d: -f1 | uniq`
 do
-    sed -i "s/tact/${PROJECT}/g" $i
+    sed -i "s/layout/${PROJECT}/g" $i
 done
 kratos proto client api/
 

@@ -19,11 +19,11 @@ init:
 .PHONY: errors
 # generate errors code
 errors:
-	protoc --proto_path=. \
-               --proto_path=./third_party \
-               --go_out=paths=source_relative:. \
-               --go-errors_out=paths=source_relative:. \
-               $(API_PROTO_FILES)
+	protoc --proto_path=./$(API_RPOTO_PATH) \
+			--proto_path=./third_party \
+			--go_out=paths=source_relative:./$(API_RPOTO_PATH) \
+			--go-errors_out=paths=source_relative:./$(API_RPOTO_PATH) \
+			$(API_PROTO_FILES)
 
 .PHONY: config
 # generate internal proto

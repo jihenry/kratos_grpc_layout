@@ -13,7 +13,7 @@ cd projectName/tools
 ```
 该初始化脚本修改相关目录结构，通过指定配置文件直接运行该模板目  
 ***
-`init.sh`脚本初始化命令如下
+`init.sh`脚本初始化命令如下，默认配置文件路径为`${workspaceFolder}/local/dev/config.yaml`
 ```shell
 eg: ./init.sh [arg ...]
         Option:

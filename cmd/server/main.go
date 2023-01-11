@@ -88,7 +88,10 @@ func main() {
 	registry, err := registry.NewNacosClient(bc.Nacos.Addr, uint64(bc.Nacos.Port),
 		constant.WithCacheDir(bc.Nacos.CacheDir),
 		constant.WithLogDir(bc.Nacos.LogDir),
-		constant.WithNamespaceId(bc.Nacos.Namespace))
+		constant.WithNamespaceId(bc.Nacos.Namespace),
+		constant.WithLogLevel(bc.Nacos.LogLevel),
+		constant.WithNotLoadCacheAtStart(bc.Nacos.NotLoadCacheAtStart),
+		constant.WithTimeoutMs(uint64(bc.Nacos.TimeoutMs)))
 	if err != nil {
 		panic(err)
 	}

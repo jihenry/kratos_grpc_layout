@@ -9,6 +9,7 @@ kratos new projectName -r http:gitxxx.com/xxx -b branch
 该脚本初始化过程利用kratos重新编译proto文件，确保`kratos`、`protoc`已安装
 ```shell
 cd projectName/tools
+chmod a+x init.sh
 ./init.sh -n projectName -c configs/xxx/xxx.yaml
 ```
 该初始化脚本修改相关目录结构，通过指定配置文件直接运行该模板目  

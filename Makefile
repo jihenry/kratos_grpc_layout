@@ -2,6 +2,7 @@ GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
 API_PROTO_FILES=$(shell find api -name *.proto)
+API_PROTO_PATH=$(shell find api -name v1 -type d | xargs dirname)
 BIN=./bin/
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
@@ -36,6 +37,7 @@ config:
 # generate api proto
 api:
 	protoc --proto_path=. \
+		   --proto_path=./$(API_PROTO_PATH) \
 	       --proto_path=./third_party \
  	       --go_out=paths=source_relative:. \
  	       --go-http_out=paths=source_relative:. \

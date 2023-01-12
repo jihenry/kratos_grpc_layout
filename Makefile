@@ -19,10 +19,10 @@ init:
 .PHONY: errors
 # generate errors code
 errors:
-	protoc --proto_path=./$(API_RPOTO_PATH) \
+	protoc --proto_path=./$(API_PROTO_PATH) \
 			--proto_path=./third_party \
-			--go_out=paths=source_relative:./$(API_RPOTO_PATH) \
-			--go-errors_out=paths=source_relative:./$(API_RPOTO_PATH) \
+			--go_out=paths=source_relative:./$(API_PROTO_PATH) \
+			--go-errors_out=paths=source_relative:./$(API_PROTO_PATH) \
 			$(API_PROTO_FILES)
 
 .PHONY: config
@@ -36,12 +36,12 @@ config:
 .PHONY: api
 # generate api proto
 api:
-	protoc --proto_path=./$(API_RPOTO_PATH) \
+	protoc --proto_path=./$(API_PROTO_PATH) \
 		--proto_path=./third_party \
-		--go_out=paths=source_relative:./$(API_RPOTO_PATH) \
-		--go-http_out=paths=source_relative:./$(API_RPOTO_PATH) \
-		--go-grpc_out=paths=source_relative:./$(API_RPOTO_PATH) \
-		--go-errors_out=paths=source_relative:./$(API_RPOTO_PATH) \
+		--go_out=paths=source_relative:./$(API_PROTO_PATH) \
+		--go-http_out=paths=source_relative:./$(API_PROTO_PATH) \
+		--go-grpc_out=paths=source_relative:./$(API_PROTO_PATH) \
+		--go-errors_out=paths=source_relative:./$(API_PROTO_PATH) \
 		--openapi_out==paths=source_relative:. \
 		$(API_PROTO_FILES) 
 

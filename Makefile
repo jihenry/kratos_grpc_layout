@@ -2,7 +2,7 @@ GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
 API_PROTO_FILES=$(shell find api -name *.proto)
-API_PROTO_PATH=$(shell find api -name v1 -type d)
+API_PROTO_PATH=$(shell find api -name *.proto | xargs dirname | uniq)
 BIN=./bin/
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 

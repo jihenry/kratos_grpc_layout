@@ -2,6 +2,7 @@ GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
 API_PROTO_FILES=$(shell find api -name *.proto)
+API_PROTO_PATH=$(shell find api -name *.proto | xargs dirname | uniq)
 BIN=./bin/
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
@@ -18,11 +19,11 @@ init:
 .PHONY: errors
 # generate errors code
 errors:
-	protoc --proto_path=. \
-               --proto_path=./third_party \
-               --go_out=paths=source_relative:. \
-               --go-errors_out=paths=source_relative:. \
-               $(API_PROTO_FILES)
+	protoc --proto_path=./$(API_PROTO_PATH) \
+			--proto_path=./third_party \
+			--go_out=paths=source_relative:./$(API_PROTO_PATH) \
+			--go-errors_out=paths=source_relative:./$(API_PROTO_PATH) \
+			$(API_PROTO_FILES)
 
 .PHONY: config
 # generate internal proto
@@ -35,13 +36,14 @@ config:
 .PHONY: api
 # generate api proto
 api:
-	protoc --proto_path=. \
-	       --proto_path=./third_party \
- 	       --go_out=paths=source_relative:. \
- 	       --go-http_out=paths=source_relative:. \
- 	       --go-grpc_out=paths=source_relative:. \
- 	       --openapi_out==paths=source_relative:. \
-	       $(API_PROTO_FILES)
+	protoc --proto_path=./$(API_PROTO_PATH) \
+		--proto_path=./third_party \
+		--go_out=paths=source_relative:./$(API_PROTO_PATH) \
+		--go-http_out=paths=source_relative:./$(API_PROTO_PATH) \
+		--go-grpc_out=paths=source_relative:./$(API_PROTO_PATH) \
+		--go-errors_out=paths=source_relative:./$(API_PROTO_PATH) \
+		--openapi_out==paths=source_relative:. \
+		$(API_PROTO_FILES) 
 
 .PHONY: build
 # build

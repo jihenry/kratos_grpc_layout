@@ -7,7 +7,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.3.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/wire v0.5.0
-	github.com/nacos-group/nacos-sdk-go v1.1.1
+	github.com/nacos-group/nacos-sdk-go v1.0.9
 	gitlab.yeahka.com/gaas/pkg v0.0.3-0.20230106040231-622217dcc378
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect

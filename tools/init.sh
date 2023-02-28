@@ -29,8 +29,8 @@ done
 if [ ! -n "$PROJECT" ];then
     echo "projectname cannot be empty"
     PrintHelp
-fi 
-    
+fi
+
 echo "更新项目名称：${PROJECT}"
 cd $RUNDIR
 mv api/* api/${PROJECT}
@@ -66,7 +66,7 @@ make api
 
 if [ ! -n "$CPATH" ];then
     CPATH=local/dev/config.yaml
-fi 
+fi
 if [ ! -e $CPATH ];then
     echo "config file not exist" ; exit 1
 fi

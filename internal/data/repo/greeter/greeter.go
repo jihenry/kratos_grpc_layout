@@ -1,23 +1,24 @@
-package data
+package greeter
 
 import (
 	"context"
 
-	"layout/internal/biz"
 	"layout/internal/biz/domain"
+	"layout/internal/biz/wire"
+	"layout/internal/data"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
 
 type greeterRepo struct {
-	data *Data
+	data *data.Data
 	log  *log.Helper
 }
 
-var _ biz.GreeterRepo = (*greeterRepo)(nil)
+var _ wire.GreeterRepo = (*greeterRepo)(nil)
 
 // NewGreeterRepo .
-func NewGreeterRepo(data *Data) biz.GreeterRepo {
+func NewGreeterRepo(data *data.Data) wire.GreeterRepo {
 	return &greeterRepo{
 		data: data,
 		log:  log.NewHelper(log.GetLogger()),

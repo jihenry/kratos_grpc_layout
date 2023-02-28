@@ -4,6 +4,8 @@ import (
 	"context"
 	"layout/internal/biz"
 	"layout/internal/conf"
+	"os"
+	"strconv"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis/v8"
@@ -14,7 +16,7 @@ import (
 	gormlogger "gorm.io/gorm/logger"
 )
 
-var ProviderSet = wire.NewSet(NewData, NewGreeterRepo, wire.Bind(new(biz.Transaction), new(*Data)))
+var ProviderSet = wire.NewSet(NewData, wire.Bind(new(biz.Transaction), new(*Data)))
 
 var _ biz.Transaction = (*Data)(nil)
 
@@ -75,4 +77,45 @@ func (d *Data) DB(ctx context.Context) *gorm.DB {
 		return tx
 	}
 	return d.mdb
+}
+
+func (d *Data) Rdb() *redis.Client {
+	return d.rdb
+}
+
+func (d *Data) Mdb() *gorm.DB {
+	return d.mdb
+}
+
+type dbInstance struct {
+	Name   string
+	Client *gorm.DB
+}
+
+type cacheInstance struct {
+	Name   string
+	Client *redis.Client
+}
+
+func (d *Data) AllDB() []*dbInstance {
+	out := make([]*dbInstance, 0, 1)
+	out = append(out, &dbInstance{
+		Name:   "gaas",
+		Client: d.mdb,
+	})
+	return out
+}
+
+func (d *Data) AllCache() []*cacheInstance {
+	out := make([]*cacheInstance, 0, 1)
+	out = append(out, &cacheInstance{
+		Name:   "db" + strconv.Itoa(int(d.rdb.Options().DB)),
+		Client: d.rdb,
+	})
+	return out
+}
+
+func (d *Data) GetID() string {
+	name, _ := os.Hostname() //TODO: 获取实例的唯一ID
+	return name
 }

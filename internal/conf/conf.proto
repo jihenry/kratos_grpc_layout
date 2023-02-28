@@ -16,9 +16,26 @@ message Bootstrap {
   Data data = 2;
   Nacos nacos = 3; //nacos注册中心
   Zap zap = 4; //zap日志
-  bool debug = 5; //是否是调试模式
-  Env env = 6; //服务环境
-  TA ta = 7; //数数上报配置
+  Env env = 5; //服务环境
+  TA ta = 6; //数数上报配置
+  Lock lock = 7; //锁配置
+  Cron cron = 8; //定时任务
+  Middleware middleware = 9; //中间件配置
+  Monitor monitor = 10; // 监控配置
+  Trace trace = 11; //链路追踪
+  Kafka kafka = 12; //消息队列
+  Service service = 13; //服务配置
+  ThirdPary tp = 14; //第三方服务
+}
+
+message Lock {
+  google.protobuf.Duration default_timeout = 1; //默认分布式锁超时时间
+}
+
+message Cron {
+  string rank = 1;
+  string sub = 2;
+  string welfare = 3; // 每日福利
 }
 
 message Server {
@@ -32,15 +49,11 @@ message Server {
     string addr = 2;
     google.protobuf.Duration timeout = 3;
   }
-  HTTP http = 1;
-  GRPC grpc = 2;
+  GRPC grpc = 1;
+  HTTP pprof = 2;
 }
 
 message Data {
-  message Cache {
-    google.protobuf.Duration cfg_lifetime = 1; //过期时间
-    bool cfg_debug = 2; //是否开启配置点缓存
-  }
   message Database {
     string driver = 1;
     string source = 2;
@@ -57,11 +70,39 @@ message Data {
     google.protobuf.Duration read_timeout = 5;
     google.protobuf.Duration write_timeout = 6;
   }
+  message Cache {
+    google.protobuf.Duration cfg_lifetime = 1; //过期时间
+    bool cfg_debug = 2; //是否开启配置点缓存
+    string namespace = 3; //命名空间，用于隔离环境
+  }
   Database database = 1;
-  Database userbase = 2;
-  Database oldbase = 3; //如果指定了这个，则老表从这里读取
-  Redis redis = 4;
-  Cache cache = 5; //缓存配置
+  Redis redis = 2;
+  Cache cache = 3; //缓存
+}
+
+message Kafka {
+  repeated string addrs = 1; //集群地址列表
+  KafkaConsumer consumer = 2; //消费者配置
+  KafkaProducer producer = 3; //生产者配置
+}
+
+message KafkaConsumer {
+  KafkaConsumerItem common = 1; //通用kafka消费组
+  google.protobuf.Duration timeout = 3; //消费过期时间
+}
+
+message KafkaProducer {
+  KafkaProducerItem common = 1; //通用kafka消费组
+}
+
+message KafkaProducerItem {
+  string topic = 1; //主题
+}
+
+message KafkaConsumerItem {
+  string topic = 1; //主题
+  string group = 2; //消费组
+  int32 mode = 3; //消费模式，0:固定区，1:多区消费
 }
 
 message Nacos {
@@ -94,4 +135,43 @@ message TA {
   Model mode = 1; //模式
   string server_url = 2; //数数部署的服务器url
   string appid = 3; //数数的appid
+}
+
+
+message Middleware {
+  bool log_reply = 1; //是否添加返回
+}
+
+message Trace{
+  string collector_url = 1; //追踪上报地址
+  string agent_host = 2; //
+  string agent_port = 3;
+  string server_name = 4;
+}
+
+message Monitor{
+  int32 monitor_time = 1; // 监控打印间隔
+  string logfile_name = 2; // 日志文件地址
+}
+
+message UserService {
+  google.protobuf.Duration login_timeout = 1; //消费过期时间
+}
+
+message Service{
+  UserService user = 1; //用户服务
+}
+
+message BaiduMap{
+  string appid = 1; //appid
+}
+
+message WeixinRobot{
+  string count_latecy = 1; //计数与延迟
+  string panic = 2; //崩溃上报
+}
+
+message ThirdPary {
+  BaiduMap baidu = 1; //百度
+  WeixinRobot robot = 2; //企业微信机器人
 }
